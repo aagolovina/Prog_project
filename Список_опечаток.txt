@@ -1,0 +1,37 @@
+Список опечаток:
+
+latvian_sample_1:
+
+īpašības -- ipasibas
+izmantošana -- ismantošana
+izejvielu -- izeievielu
+
+latvian_sample_2:
+
+pavasara -- pavasora
+jaukas -- jauzkas
+plaukšanai -- plauksanaj
+
+latvian_sample_3:
+
+pieturēja -- petutēja
+uzskrēja -- ušskreja
+viņa -- vinja
+
+lithuanian_sample_1:
+
+gražų -- grazy
+nekaltas -- netalkas
+mokiniu -- mokinu
+
+lithuanian_sample_2:
+
+diena -- djena
+ožio -- ozioj
+kiekvieną -- kiekvjena
+
+lithuanian_sample_3:
+
+širdyje -- širdije
+rodos -- rodas
+Odisėjau -- Odiseju

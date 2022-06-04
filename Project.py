@@ -105,7 +105,7 @@ class MainWindow(QMainWindow):
                                 f.write(f"{re.sub(w, replace_with_correct(words[i], corpus), words[i])} ")
 
                 dlg = QMessageBox(self) # окно с сообщением о том, что все супер, вы прекрасны
-                dlg.setWindowTitle("Sucess!")
+                dlg.setWindowTitle("Success!")
                 dlg.setText("Ваш файл готов!")
                 dlg.exec()
                             
@@ -138,7 +138,7 @@ class MainWindow(QMainWindow):
                                 f.write(f"{re.sub(w, indicate_wrong(w, ind), words[i])} ") # выделение тегами исключительно неправильной части
 
                 dlg = QMessageBox(self) # окно с сообщением том, что все хорошо
-                dlg.setWindowTitle("Sucess!")
+                dlg.setWindowTitle("Success!")
                 dlg.setText("Ваш файл готов!")
                 button = dlg.exec()
             
@@ -170,7 +170,7 @@ class MainWindow(QMainWindow):
                             else:
                                 f.write(f"{re.sub(w, indicate_wrong(w, ind), words[i])} ") # выделение тегами исключительно неправильной части
                 dlg = QMessageBox(self) # окно с сообщением том, что все хорошо
-                dlg.setWindowTitle("Sucess!")
+                dlg.setWindowTitle("Success!")
                 dlg.setText("Ваш файл готов!")
                 button = dlg.exec()
 

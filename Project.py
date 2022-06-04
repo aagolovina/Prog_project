@@ -48,14 +48,18 @@ class MainWindow(QMainWindow):
         label.setAlignment(Qt.AlignmentFlag.AlignCenter) # выравнивание по центру
         self.setFixedSize(QSize(500, 400)) # фиксированный размер окна
         self.setCentralWidget(label) # текст в центре окна
-
+        
         button_change = QAction("&Замена", self) # кнопка номер раз
         button_change.setStatusTip("Заменить слово с опечаткой") # понты бессмысленные и беспощадные: всплывающий текст при наведении мыши
         button_change.triggered.connect(self.onTheChangeButtonClick) # что делать, если кнопка нажата
 
-        button_indication = QAction("&Выделение", self) # кнопка номер два
-        button_indication.setStatusTip("Выделить слово с опечаткой")
-        button_indication.triggered.connect(self.onTheIndicationButtonClick)
+        button_italics = QAction("&Курсив", self) # кнопка номер два
+        button_italics.setStatusTip("Выделить слово с опечаткой")
+        button_italics.triggered.connect(self.onTheItalicsButtonClick)
+        
+        button_bold = QAction("&Полужирный", self) # кнопка номер два
+        button_bold.setStatusTip("Выделить слово с опечаткой")
+        button_bold.triggered.connect(self.onTheBoldButtonClick)
         
         button_help = QAction("&Справка", self) # кнопка номер три
         button_help.setStatusTip("Справка")
@@ -65,10 +69,14 @@ class MainWindow(QMainWindow):
         file_menu = menu.addMenu("&Mode") # раздел первый, кнопки: замена и выделение
         file_menu.addAction(button_change)
         file_menu.addSeparator() # ну просто прикольный разделитель почему бы и нет
-        file_menu.addAction(button_indication)
+        file_submenu = file_menu.addMenu("Выделение") # подраздел меню
+        file_submenu.addAction(button_bold)
+        file_submenu.addSeparator()
+        file_submenu.addAction(button_italics)
+        
         file_menu = menu.addMenu("&Help") # раздел второй: кнопки: справка
         file_menu.addAction(button_help)
-        
+    
     def onTheChangeButtonClick(self): # если пользователь нажал кнопку замены
         file_upload = QFileDialog.getOpenFileName()[0] # окно для загрузки файла, который хотим проверить
         langcode = {
@@ -97,54 +105,74 @@ class MainWindow(QMainWindow):
                                 f.write(f"{re.sub(w, replace_with_correct(words[i], corpus), words[i])} ")
 
                 dlg = QMessageBox(self) # окно с сообщением о том, что все супер, вы прекрасны
-                dlg.setWindowTitle("Sucсess!")
+                dlg.setWindowTitle("Sucess!")
                 dlg.setText("Ваш файл готов!")
                 dlg.exec()
                             
-    def onTheIndicationButtonClick(self): # если пользователь нажал кнопку выделения
-        file_upload = QFileDialog.getOpenFileName()[0] # все то же самое, что при нажатии замены
+    def onTheItalicsButtonClick(self): # если пользователь нажал кнопку выделения курсивом
+        file_upload = QFileDialog.getOpenFileName()[0] # окно для загрузки файла, который хотим проверить
         langcode = {
             'lv':'Latvian',
             'lt':'Lithuanian'
-        }
+        } # для удобства после распознавания языка: распознавание выдает код языка, а по словарю можно выцеплять первые слова в названиях нужных файлов
 
-        with open(file_upload, 'r', encoding = 'utf-8') as f:
+        with open(file_upload, 'r', encoding = 'utf-8') as f: # читаем, че там
             text = f.read() # это текст пользователя
             code = detect(text)
-            if code not in langcode: # опять же, не мои проблемы, что пользователь не читает инструкцию
-                dlg = QMessageBox(self)
+            if code not in langcode: # если пользователь не умеет читать стартовые инструкции -- не моя проблема
+                dlg = QMessageBox(self) # окно с сообщением об ошибке, если язык не латышский и не литовский
                 dlg.setWindowTitle("Error")
                 dlg.setText("Ошибка! Язык недоступен!")
                 dlg.exec()
             else:
                 words = text.split()
-                dlg = QMessageBox(self)
-                dlg.setWindowTitle("Indication")
-                dlg.setText('Напишите тип выделения в консоли\n\nДля этого нажмите на кнопку "Ок"')
-# в итоге писать в консоль, потому что не получилось воплотить изначальную задумку с выбором типа нажатием кнопки во всплывающем окне
-# я не понимаю, как настроить диалоговое окно с кастомными кнопками, а не стандартными + так, чтобы они давали значение ind
-                button = dlg.exec()
-                ind = input('Выберите тип выделения (полужирный или курсив): ').lower()
-                if ind != 'полужирный' and ind != 'курсив': # на случай, если пользователь не умеет писать
-                    dlg = QMessageBox(self)
-                    dlg.setWindowTitle("Error")
-                    dlg.setText("Ошибка! Некорректный ввод!")
-                    dlg.exec()
-                else:
-                    with open(f"{langcode[code]}_corpus.txt", 'r', encoding = 'utf-8') as c: # открываем корпус
-                        with open(f'Ошибки_{ind}.md', 'w', encoding = 'utf-8') as f: # создаем файл для подсветки опечаток
-                            corpus = set(c.read().split('\n'))
-                            for i in range(len(words)):
-                                w = re.sub(r'[^A-Za-zĀāĄąČčĒēĘęĖėĢģĪīĮįĶķĻļŅņŠšŪūŲųŽž\s\d]+','', words[i]) # для поиска по корпусу ремувим пунктуацию
-                                if w in corpus or w.isalpha() == False:
-                                    f.write(f"{words[i]} ")
-                                else:
-                                    f.write(f"{re.sub(w, indicate_wrong(w, ind), words[i])} ") # выделение тегами исключительно неправильной части
+                ind = 'курсив' # сразу присваиваем необходимое значение переменной
+                with open(f"{langcode[code]}_corpus.txt", 'r', encoding = 'utf-8') as c: # открываем корпус
+                    with open(f'Ошибки_{ind}.md', 'w', encoding = 'utf-8') as f: # создаем файл для подсветки опечаток
+                        corpus = set(c.read().split('\n'))
+                        for i in range(len(words)):
+                            w = re.sub(r'[^A-Za-zĀāĄąČčĒēĘęĖėĢģĪīĮįĶķĻļŅņŠšŪūŲųŽž\s\d]+','', words[i]) # для поиска по корпусу ремувим пунктуацию
+                            if w in corpus or w.isalpha() == False:
+                                f.write(f"{words[i]} ")
+                            else:
+                                f.write(f"{re.sub(w, indicate_wrong(w, ind), words[i])} ") # выделение тегами исключительно неправильной части
 
-                    dlg = QMessageBox(self) # окно с сообщением том, что все хорошо
-                    dlg.setWindowTitle("Suсcess!")
-                    dlg.setText("Ваш файл готов!")
-                    button = dlg.exec()
+                dlg = QMessageBox(self) # окно с сообщением том, что все хорошо
+                dlg.setWindowTitle("Sucess!")
+                dlg.setText("Ваш файл готов!")
+                button = dlg.exec()
+            
+    def onTheBoldButtonClick(self): # если пользователь нажал кнопку выделения полужирным
+        file_upload = QFileDialog.getOpenFileName()[0] # окно для загрузки файла, который хотим проверить
+        langcode = {
+            'lv':'Latvian',
+            'lt':'Lithuanian'
+        } # для удобства после распознавания языка: распознавание выдает код языка, а по словарю можно выцеплять первые слова в названиях нужных файлов
+
+        with open(file_upload, 'r', encoding = 'utf-8') as f: # читаем, че там
+            text = f.read() # это текст пользователя
+            code = detect(text)
+            if code not in langcode: # если пользователь не умеет читать стартовые инструкции -- не моя проблема
+                dlg = QMessageBox(self) # окно с сообщением об ошибке, если язык не латышский и не литовский
+                dlg.setWindowTitle("Error")
+                dlg.setText("Ошибка! Язык недоступен!")
+                dlg.exec()
+            else:
+                words = text.split()
+                ind = 'полужирный' # сразу присваиваем необходимое значение переменной
+                with open(f"{langcode[code]}_corpus.txt", 'r', encoding = 'utf-8') as c: # открываем корпус
+                    with open(f'Ошибки_{ind}.md', 'w', encoding = 'utf-8') as f: # создаем файл для подсветки опечаток
+                        corpus = set(c.read().split('\n'))
+                        for i in range(len(words)):
+                            w = re.sub(r'[^A-Za-zĀāĄąČčĒēĘęĖėĢģĪīĮįĶķĻļŅņŠšŪūŲųŽž\s\d]+','', words[i]) # для поиска по корпусу ремувим пунктуацию
+                            if w in corpus or w.isalpha() == False:
+                                f.write(f"{words[i]} ")
+                            else:
+                                f.write(f"{re.sub(w, indicate_wrong(w, ind), words[i])} ") # выделение тегами исключительно неправильной части
+                dlg = QMessageBox(self) # окно с сообщением том, что все хорошо
+                dlg.setWindowTitle("Sucess!")
+                dlg.setText("Ваш файл готов!")
+                button = dlg.exec()
 
     def onTheHelpButtonClick(self): # справка, если вдруг первичные инструкции проигнорировали
         dlg = QMessageBox(self)

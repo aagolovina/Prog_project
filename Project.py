@@ -46,22 +46,23 @@ class MainWindow(QMainWindow):
         label = QLabel(descript) # размещение текста
         label.setWordWrap(True) # переносы, иначе текст улетает за границы окна
         label.setAlignment(Qt.AlignmentFlag.AlignCenter) # выравнивание по центру
-        self.setFixedSize(QSize(500, 400)) # фиксированный размер окна
+#        self.setFixedSize(QSize(500, 400)) # фиксированный размер окна
+# предыдущую строчку можно раскомментировать, и тогда будет окно фиксированного размера
         self.setCentralWidget(label) # текст в центре окна
         
         button_change = QAction("&Замена", self) # кнопка номер раз
-        button_change.setStatusTip("Заменить слово с опечаткой") # понты бессмысленные и беспощадные: всплывающий текст при наведении мыши
+        button_change.setStatusTip("Заменить слово с опечаткой") # понты: всплывающий текст при наведении мыши
         button_change.triggered.connect(self.onTheChangeButtonClick) # что делать, если кнопка нажата
 
         button_italics = QAction("&Курсив", self) # кнопка номер два
         button_italics.setStatusTip("Выделить слово с опечаткой")
         button_italics.triggered.connect(self.onTheItalicsButtonClick)
         
-        button_bold = QAction("&Полужирный", self) # кнопка номер два
+        button_bold = QAction("&Полужирный", self) # кнопка номер три
         button_bold.setStatusTip("Выделить слово с опечаткой")
         button_bold.triggered.connect(self.onTheBoldButtonClick)
         
-        button_help = QAction("&Справка", self) # кнопка номер три
+        button_help = QAction("&Справка", self) # кнопка номер четыре
         button_help.setStatusTip("Справка")
         button_help.triggered.connect(self.onTheHelpButtonClick)
         
@@ -78,7 +79,7 @@ class MainWindow(QMainWindow):
         file_menu.addAction(button_help)
     
     def onTheChangeButtonClick(self): # если пользователь нажал кнопку замены
-        file_upload = QFileDialog.getOpenFileName()[0] # окно для загрузки файла, который хотим проверить
+        file_upload = QFileDialog.getOpenFileName()[0] # всплывающее окно для загрузки файла, который хотим проверить
         langcode = {
             'lv':'Latvian',
             'lt':'Lithuanian'
@@ -87,7 +88,7 @@ class MainWindow(QMainWindow):
         with open(file_upload, 'r', encoding = 'utf-8') as f: # читаем, че там
             text = f.read() # это текст пользователя
             code = detect(text)
-            if code not in langcode: # если пользователь не умеет читать стартовые инструкции -- не моя проблема
+            if code not in langcode: # если пользователь не умеет читать стартовые инструкции
                 dlg = QMessageBox(self) # окно с сообщением об ошибке, если язык не латышский и не литовский
                 dlg.setWindowTitle("Error")
                 dlg.setText("Ошибка! Язык недоступен!")
@@ -101,7 +102,7 @@ class MainWindow(QMainWindow):
                             w = re.sub(r'[^A-Za-zĀāĄąČčĒēĘęĖėĢģĪīĮįĶķĻļŅņŠšŪūŲųŽž\s\d]+','', words[i]) # жуткая регулярка отсекает знаки препинания
                             if w in corpus or w.isalpha() == False: # если токен, очищенный от пунктуации, в корпусе, либо это не токен, а цифра -- пишем все, что было до отрезания пунктуации
                                 f.write(f"{words[i]} ")
-                            else: # заменяем в исходной единице-токене часть без пунктуации на верный варик написания
+                            else: # заменяем в исходной единице-токене часть без пунктуации на верный вариант написания
                                 f.write(f"{re.sub(w, replace_with_correct(words[i], corpus), words[i])} ")
 
                 dlg = QMessageBox(self) # окно с сообщением о том, что все супер, вы прекрасны
@@ -119,7 +120,7 @@ class MainWindow(QMainWindow):
         with open(file_upload, 'r', encoding = 'utf-8') as f: # читаем, че там
             text = f.read() # это текст пользователя
             code = detect(text)
-            if code not in langcode: # если пользователь не умеет читать стартовые инструкции -- не моя проблема
+            if code not in langcode: # если пользователь не умеет читать стартовые инструкции
                 dlg = QMessageBox(self) # окно с сообщением об ошибке, если язык не латышский и не литовский
                 dlg.setWindowTitle("Error")
                 dlg.setText("Ошибка! Язык недоступен!")
@@ -169,6 +170,7 @@ class MainWindow(QMainWindow):
                                 f.write(f"{words[i]} ")
                             else:
                                 f.write(f"{re.sub(w, indicate_wrong(w, ind), words[i])} ") # выделение тегами исключительно неправильной части
+                
                 dlg = QMessageBox(self) # окно с сообщением том, что все хорошо
                 dlg.setWindowTitle("Success!")
                 dlg.setText("Ваш файл готов!")

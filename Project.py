@@ -26,7 +26,7 @@ def indicate_wrong(token, marker): # тут просто замена токен
     }
     res = f'{indication[marker]}{token}{indication[marker]}'
     return res
-# ядро через раз перезапускать, но ладно, хрен с ним, работает -- на том спасибо
+# ядро через раз перезапускать, но ладно, работает -- на том спасибо
 
 class MainWindow(QMainWindow):
     def __init__(self):
